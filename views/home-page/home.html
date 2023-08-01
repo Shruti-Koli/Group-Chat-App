@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  </head>
+
+  <body style="font-family: 'Roboto Slab', serif;  background-color: #b4c6f8;">
+    <!-- nav bar -->
+    <nav style= "background-color: #5169a6;" class="navbar navbar-light">
+      <a style= "color:white;" class="link-opacity-100-hover mx-3" href="./home.html">Home Page</a>
+      <button class="btn btn-secondary my-2 mx-3 my-sm-0" style=" box-shadow: 0px 0px 20px #00000070;">Log Out</button>
+    </nav>
+    <!-- content -->
+    <div id="content" class="content container-fluid" style="margin-top: 55px;">
+      <div class="row">
+        <div class="col">
+          <div class="card">
+            <div class="card-header text-center" style="background-color:#5d76bd ;" name="groupnamediv" id="">
+              <h3 style="display: inline; font-weight:bold" id="groupnamespan">Click on a Group to show the chats</h3>
+              <p id="groupdescription"></p>
+              <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <button class="btn btn-primary" type="button"id="editgroup" onclick="editGroup(event)">Edit Group</button>
+              </div>
+            </div>
+            <div class="card-body" id="chatbox">
+              <p class="card-text">No messages yet</p>
+          </div>
+          <div class="card-footer">
+            <div class="input-group mb-3">
+              <input type="text" class="form-control" placeholder="Type message here" id="messageinputbox">
+                <div class="input-group-append">
+                  <button class="btn btn-outline-secondary" type="button" onclick="sendMessage(event)">Send</button>
+                </div>
+            </div>
+          </div>          
+        </div>
+      </div>
+    </div>
+    <!-- bootstrap cdn -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+  </body>
+</html>
