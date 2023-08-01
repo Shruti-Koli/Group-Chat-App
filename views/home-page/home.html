@@ -70,13 +70,20 @@
         }
         })
 
+        window.setInterval(async () => {
+          try{
+            displayChats()
+          } catch(err){
+              console.log(err)
+          }
+        }, 10000)
+
+
         async function displayChats(){
           try{
             const chatdisp = document.getElementById('chatbox')
             const token = localStorage.getItem('token')
             const res=await axios.get('http://localhost:3000/chat/message',{headers:{"auth":token}})
-            console.log(res);
-            console.log(res.data.messages)
             const allchats = res.data.messages;
             chatdisp.innerHTML="";
             allchats.forEach(ele=>{
@@ -105,8 +112,6 @@
             }
             
             const res=await axios.post('http://localhost:3000/chat/message',messageObj,{headers:{"auth":token}})
-            console.log(res);
-            console.log(res.data.newMessage.message);
             displayChats();
             // if(res.data.newMessage.message){
             //   const p = document.createElement('p')
