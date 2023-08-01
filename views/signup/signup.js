@@ -7,7 +7,7 @@ async function onsignup(event){
             pass: event.target.pass.value
         }
 
-        let op = await axios.post("http://localhost:4000/user/signup",myobj);
+        let op = await axios.post("http://localhost:3000/user/signup",myobj);
         console.log(op.status);
         if(op.status==201){
           alert('Sign up successful');
