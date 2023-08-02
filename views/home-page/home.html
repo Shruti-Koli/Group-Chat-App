@@ -64,34 +64,100 @@
               window.location.href = '../login/login.html'
           }
           //Displaying chats
-          displayChats();
+          getMessages();
+          
         } catch(err){
-          console.log(err)
+          console.log(err);
+          displayError(err);
         }
         })
 
         window.setInterval(async () => {
           try{
-            displayChats()
+            getMessages()
           } catch(err){
-              console.log(err)
+              console.log(err);
+              displayError(err);
           }
         }, 10000)
 
 
         async function displayChats(){
           try{
+            
             const chatdisp = document.getElementById('chatbox')
-            const token = localStorage.getItem('token')
-            const res=await axios.get('http://localhost:3000/chat/message',{headers:{"auth":token}})
-            const allchats = res.data.messages;
-            chatdisp.innerHTML="";
-            allchats.forEach(ele=>{
-              const p = document.createElement('p')
-              p.className = 'cart-text'
-              p.innerText = `${ele.userId}: ${ele.message}`
-              chatdisp.appendChild(p)
-            })
+            // console.log("here2")
+            const alluchats = JSON.parse(localStorage.getItem('oldChats'));
+            // console.log("alluchats",alluchats)
+            if(alluchats!=null){
+              if(alluchats.length>0){
+                chatdisp.innerHTML="";
+                alluchats.forEach(ele=>{
+                  const p = document.createElement('p')
+                  p.className = 'cart-text'
+                  p.innerText = `${ele.user.name}: ${ele.message}`
+                  chatdisp.appendChild(p)
+                })
+              }
+            }
+          }catch(err){
+            console.log(err);
+            displayError(err);
+          }
+        }
+
+        async function getMessages(){
+          try{
+
+            const token = localStorage.getItem('token');
+
+            let oldChats = localStorage.getItem('oldChats');
+            let oldChat_Array = JSON.parse(localStorage.getItem('oldChats'));
+
+            let previousId=0;            
+            if(oldChat_Array!=null || oldChat_Array!=undefined ){
+              if(oldChat_Array.length>0){
+                previousId = (oldChat_Array[oldChat_Array.length-1].id);
+              }
+            }
+
+            //console.log("previousId",previousId);
+
+            const res = await axios.get(`http://localhost:3000/chat/message?previousId=${previousId}`,{headers:{"auth":token}})
+
+            const allnewchats = res.data.messages;
+            //console.log("-----allnewchats----",allnewchats);
+            if(allnewchats.length>0 &&(allnewchats!=null|| allnewchats!=undefined)){
+              updateLocalStorage(allnewchats);
+            }else{
+              displayChats();
+            }
+            //console.log("allchats received",allchats)
+          }catch(err){
+            console.log(err);
+            displayError(err);
+          }
+        }
+
+        function updateLocalStorage(allnewchats){
+          try{
+            const oldLS = localStorage.getItem('oldChats');
+            const oldLS_parsed = JSON.parse(oldLS);
+            //const stringRes = JSON.stringify(allchats);
+            let updatedLS;
+            if(oldLS_parsed==0|| oldLS_parsed ==undefined|| oldLS_parsed.length==0){
+              updatedLS=[...allnewchats]
+            }else{
+              updatedLS=oldLS_parsed.concat(allnewchats);
+              console.log("====updatedLS----",updatedLS)
+            }
+            if(updatedLS.length>10){
+              updatedLS=updatedLS.slice(updatedLS.length-10)
+            }
+            const stringupdatedLS = JSON.stringify(updatedLS)      
+            localStorage.setItem('oldChats',stringupdatedLS)
+            //console.log("---end of update---",localStorage.getItem('oldChats'))
+            displayChats();
           }catch(err){
             console.log(err);
             displayError(err);
@@ -102,7 +168,7 @@
           try{
             const token = localStorage.getItem('token')
             const decodeToken = parseJwt(token);
-            console.log("tokrn",decodeToken);
+            //console.log("token",decodeToken);
             const chatdisp = document.getElementById('chatbox')
             const textbox = document.getElementById('messageinputbox');
             const message = textbox.value;
@@ -112,14 +178,7 @@
             }
             
             const res=await axios.post('http://localhost:3000/chat/message',messageObj,{headers:{"auth":token}})
-            displayChats();
-            // if(res.data.newMessage.message){
-            //   const p = document.createElement('p')
-            //   p.className = 'cart-text'
-            //   p.innerText = `${decodeToken.name}: ${res.data.newMessage.message}`
-            //   chatdisp.appendChild(p)
-            // }
-            //showMessageonscreen(res.data);
+            getMessages();
           }catch(err){
             console.log(err);
             displayError(err);
@@ -144,7 +203,7 @@
         
         function logout(e){
             localStorage.removeItem('token')
-            localStorage.removeItem('chats')
+            localStorage.removeItem('oldChats')
             window.location.href = '../login/login.html'
         }
     </script>

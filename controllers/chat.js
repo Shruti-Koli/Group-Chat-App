@@ -1,6 +1,7 @@
 const Chat = require('../models/chat');
 const User = require('../models/user');
 const sequelize = require('../utils/database');
+const { Op } = require('sequelize');
 
 function Invalidstring(str){
     if(str.trim().length==0 || str == undefined){
@@ -12,7 +13,23 @@ function Invalidstring(str){
 
 exports.getChats = async(req, res, next)=>{
     try{
-        const data = await Chat.findAll()
+        const previousId = req.query.previousId;
+        console.log('previousId======',previousId);
+        const data = await Chat.findAll({
+            attributes: ['id','message'],
+            where:{
+                id:{
+                [Op.gt]:previousId
+                }},    
+            include: [{     
+                model : User,
+                attributes : ['name'],
+                required : true
+            }],
+            order : ['id']
+        })
+
+
         res.status(200).json({
             messages: data
          })
