@@ -73,28 +73,6 @@ exports.getGroupUsers = async(req, res, next)=>{
                 attributes:['id','name','email']
             })
 
-            // const userList = await User.findAll({
-            //     attributes: ['id', 'name', 'email'],
-            //     include: [
-            //       {
-            //         model: Group,
-            //         where: { id: groupId },
-            //         attributes: [admin], // Set this to an empty array to exclude Group attributes from the result
-            //       }
-            //     ],
-            //   });
-
-
-
-            // const userList = await UserAndGroup.findAll({
-            //     where:{
-            //         groupId: groupId},    
-            //     include: [{     
-            //         model : User,
-            //         attributes : ['name','email'],
-            //     },],
-            //     order : ['id']
-            // });
             console.log("userList:::",listofusers)
             return res.status(200).json({listofusers: listofusers})
         }else{
