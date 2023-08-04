@@ -9,7 +9,6 @@ const generateToken=(id, name, ispremiumuser)=>{
 
 const signup = async (req,res,next)=>{
     try{
-        console.log("inside");
         const name = req.body.name.trim();
         const email= req.body.email.trim();
         const pass = req.body.pass;

@@ -18,6 +18,17 @@
     <div id="content" class="content container-fluid" style="margin-top: 55px;">
       <div class="row">
         <div class="col">
+          <div class="card shadow">
+            <div class="card-header text-center" style="background-color:#5d76bd;">
+              <h5 style="display: inline; font-weight:bold" id="groupnamespan">Your Groups:</h5>
+            </div>
+            <div class="card-body text-center" id="groupslist">
+              <p class="card-text">No groups joined yet</p>
+            </div>
+            <button type="button" class="btn btn-secondary mx-5 mb-2" style=" box-shadow: 0px 0px 5px #0000009c;" onclick="addGroup(event)">Add Group</button>
+          </div>
+        </div>
+        <div class="col-8" id="chatcolumn">
           <div class="card shadow" >
             <div class="card-header text-center" style="background-color:#5d76bd ;" name="groupnamediv" id="">
               <h3 style="display: inline; font-weight:bold" id="groupnamespan">Click on a Group to show the chats</h3>
@@ -28,15 +39,43 @@
             </div>
             <div class="card-body" id="chatbox">
               <p class="card-text">No messages yet</p>
-          </div>
-          <div class="card-footer">
-            <div class="input-group mb-3">
-              <input type="text" class="form-control" placeholder="Type message here" id="messageinputbox">
-                <div class="input-group-append">
-                  <button class="btn btn-outline-secondary" type="button" onclick="sendMessage(event)">Send</button>
-                </div>
             </div>
-          </div>          
+            <div class="card-footer" style="background-color:#5d76bd;">
+              <div class="input-group mb-3">
+                <input type="text" class="form-control" placeholder="Type message here" id="messageinputbox">
+                  <div class="input-group-append">
+                    <button class="btn btn-secondary mx-2" type="button" onclick="sendMessage(event)" style=" box-shadow: 0px 0px 20px #00000070;">Send</button>
+                  </div>
+              </div>
+            </div>        
+          </div>
+        </div>
+        <div class="col" id="editcolumn" hidden="hidden">
+          <div class="card">
+            <div class="card-header text-center">Add Users </div>
+              <div class="p-2 input-group mb-3">
+                <span class="input-group-text">User's Name :</span>
+                  <input type="text" id="usersname" class="form-control" aria-label="Sizing example input"
+                        aria-describedby="inputGroup-sizing-default" required>
+                    <div class="input-group mb-3">
+                      <span class="input-group-text">User Email :</span>
+                      <input type="email" id="usersemail" class="form-control" aria-label="Sizing example input"
+                            aria-describedby="inputGroup-sizing-default" required>
+                    </div>
+                    <div class="btn p-1 col-12">
+                      <button type="submit" onclick="addParticipant(event)" class="btn btn-primary mx-auto"> Add
+                            users</button><br>
+                    </div><br>
+
+                    <p class="text-center fst-italic  mx-auto" id="useraddingresult"></p>
+                </div>
+                <div class="card-footer text-center">
+                  Manage Users<br>
+                  <p id="manageusersmessagediv"></p>
+                </div>
+                <div class="card-body text-center" id="userslist">
+              </div>
+            </div>
         </div>
       </div>
     </div>
@@ -61,26 +100,57 @@
         //LogOut code
           const token = localStorage.getItem('token')
           if(token === null){
-              window.location.href = '../login/login.html'
+            logout();
           }
           //Displaying chats
           getMessages();
+          getGroups();
           
         } catch(err){
           console.log(err);
           displayError(err);
         }
-        })
+      })
 
-        window.setInterval(async () => {
+        // window.setInterval(async () => {
+        //   try{
+        //     getMessages()
+        //   } catch(err){
+        //       console.log(err);
+        //       displayError(err);
+        //   }
+        // }, 10000)
+
+        async function getGroups(){
           try{
-            getMessages()
-          } catch(err){
-              console.log(err);
-              displayError(err);
-          }
-        }, 10000)
 
+            const token = localStorage.getItem('token');
+            const groupslist = document.getElementById('groupslist');
+
+            const res = await axios.get(`http://localhost:3000/group/group`,{headers:{"auth":token}})
+
+            const allGroups = res.data.allGroups;
+            console.log(allGroups);
+
+            if(allGroups.length > 0){
+
+              groupslist.innerHTML = ''
+
+              allGroups.forEach(element => {
+                groupslist.innerHTML += `
+                <li class="list-group-item">
+                  <button class="btn btn-secondary mx-2 my-2" id ="${element.GroupId}" onclick="showGroupChats(event)">${element.groupName}</button>
+                </li>`
+              })
+            }
+
+
+
+          }catch(err){
+            console.log(err);
+            displayError(err);
+          }
+        }
 
         async function displayChats(){
           try{
@@ -183,6 +253,10 @@
             console.log(err);
             displayError(err);
           }
+        }
+
+        function addGroup(){
+          window.location.href = '../add-group/add-group.html'
         }
 
         function displayError(err){
