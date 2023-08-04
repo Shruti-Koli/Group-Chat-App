@@ -31,7 +31,7 @@
         <div class="col-8" id="chatcolumn">
           <div class="card shadow" >
             <div class="card-header text-center" style="background-color:#5d76bd ;" name="groupnamediv" id="">
-              <h3 style="display: inline; font-weight:bold" id="groupnamespan">Click on a Group to show the chats</h3>
+              <h3 style="display: inline; font-weight:bold" id="groupnamespan1">Click on a Group to show the chats</h3>
               <p id="groupdescription"></p>
               <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                 <button class="btn btn-secondary" type="button"id="editgroup" onclick="editGroup(event)" style=" box-shadow: 0px 0px 20px #00000070;">Edit Group</button>
@@ -84,7 +84,7 @@
     <!-- axios -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
     <script>
-
+      let selectedGroupid;
       function parseJwt (token) {
         var base64Url = token.split('.')[1];
         var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -103,7 +103,7 @@
             logout();
           }
           //Displaying chats
-          getMessages();
+          //getMessages();
           getGroups();
           
         } catch(err){
@@ -139,7 +139,7 @@
               allGroups.forEach(element => {
                 groupslist.innerHTML += `
                 <li class="list-group-item">
-                  <button class="btn btn-secondary mx-2 my-2" id ="${element.GroupId}" onclick="showGroupChats(event)">${element.groupName}</button>
+                  <button class="btn btn-secondary mx-2 my-2" id ="${element.id}" onclick="getMessages1(event)">${element.groupName}</button>
                 </li>`
               })
             }
@@ -152,13 +152,65 @@
           }
         }
 
-        async function displayChats(){
+        // async function showGroupChats(){
+
+        // }
+        async function getMessages1(e){
+          try{
+            const chatdisp = document.getElementById('chatbox')
+            chatdisp.innerHTML="";
+            const groupnameh3 = document.getElementById("groupnamespan1");
+            groupnameh3.innerText = e.target.innerText;
+            const groupid = e.target.id;
+            selectedGroupid = groupid;
+            getMessages();
+            }catch(err){
+            console.log(err);
+            displayError(err);
+          }
+        }
+        
+
+        async function getMessages(){
+          try{
+            console.log("selectedGroupidhr",selectedGroupid);
+            const token = localStorage.getItem('token');
+
+            let oldChats = localStorage.getItem(`oldChats${selectedGroupid}`);
+            let oldChat_Array = JSON.parse(localStorage.getItem(`oldChats${selectedGroupid}`));
+
+            let previousId=0;            
+            if(oldChat_Array!=null || oldChat_Array!=undefined ){
+              if(oldChat_Array.length>0){
+                previousId = (oldChat_Array[oldChat_Array.length-1].id);
+              }
+            }
+
+            console.log("previousId",previousId);
+
+            const res = await axios.get(`http://localhost:3000/chat/message?previousId=${previousId}&groupId=${selectedGroupid}`,{headers:{"auth":token}})
+
+            const allnewchats = res.data.messages;
+            //console.log("-----allnewchats----",allnewchats);
+            if(allnewchats.length>0 &&(allnewchats!=null|| allnewchats!=undefined)){
+              updateLocalStorage(allnewchats,selectedGroupid);
+            }else{
+              displayChats(selectedGroupid);
+            }
+            //console.log("allchats received",allchats)
+          }catch(err){
+            console.log(err);
+            displayError(err);
+          }
+        }
+
+        async function displayChats(groupid){
           try{
             
             const chatdisp = document.getElementById('chatbox')
             // console.log("here2")
-            const alluchats = JSON.parse(localStorage.getItem('oldChats'));
-            // console.log("alluchats",alluchats)
+            const alluchats = JSON.parse(localStorage.getItem(`oldChats${selectedGroupid}`));
+            console.log("alluchats for  ",selectedGroupid," chats",alluchats)
             if(alluchats!=null){
               if(alluchats.length>0){
                 chatdisp.innerHTML="";
@@ -174,44 +226,11 @@
             console.log(err);
             displayError(err);
           }
-        }
+        } 
 
-        async function getMessages(){
+        function updateLocalStorage(allnewchats,groupid){
           try{
-
-            const token = localStorage.getItem('token');
-
-            let oldChats = localStorage.getItem('oldChats');
-            let oldChat_Array = JSON.parse(localStorage.getItem('oldChats'));
-
-            let previousId=0;            
-            if(oldChat_Array!=null || oldChat_Array!=undefined ){
-              if(oldChat_Array.length>0){
-                previousId = (oldChat_Array[oldChat_Array.length-1].id);
-              }
-            }
-
-            //console.log("previousId",previousId);
-
-            const res = await axios.get(`http://localhost:3000/chat/message?previousId=${previousId}`,{headers:{"auth":token}})
-
-            const allnewchats = res.data.messages;
-            //console.log("-----allnewchats----",allnewchats);
-            if(allnewchats.length>0 &&(allnewchats!=null|| allnewchats!=undefined)){
-              updateLocalStorage(allnewchats);
-            }else{
-              displayChats();
-            }
-            //console.log("allchats received",allchats)
-          }catch(err){
-            console.log(err);
-            displayError(err);
-          }
-        }
-
-        function updateLocalStorage(allnewchats){
-          try{
-            const oldLS = localStorage.getItem('oldChats');
+            const oldLS = localStorage.getItem(`oldChats${selectedGroupid}`);
             const oldLS_parsed = JSON.parse(oldLS);
             //const stringRes = JSON.stringify(allchats);
             let updatedLS;
@@ -225,8 +244,8 @@
               updatedLS=updatedLS.slice(updatedLS.length-10)
             }
             const stringupdatedLS = JSON.stringify(updatedLS)      
-            localStorage.setItem('oldChats',stringupdatedLS)
-            //console.log("---end of update---",localStorage.getItem('oldChats'))
+            localStorage.setItem(`oldChats${selectedGroupid}`,stringupdatedLS)
+            //console.log("---end of update---",localStorage.getItem(`oldChats${groupid}`))
             displayChats();
           }catch(err){
             console.log(err);
@@ -236,6 +255,7 @@
 
         async function sendMessage(e){
           try{
+            const groupid = selectedGroupid;
             const token = localStorage.getItem('token')
             const decodeToken = parseJwt(token);
             //console.log("token",decodeToken);
@@ -247,7 +267,7 @@
               message:message
             }
             
-            const res=await axios.post('http://localhost:3000/chat/message',messageObj,{headers:{"auth":token}})
+            const res=await axios.post(`http://localhost:3000/chat/message?groupId=${groupid}`,messageObj,{headers:{"auth":token}})
             getMessages();
           }catch(err){
             console.log(err);
