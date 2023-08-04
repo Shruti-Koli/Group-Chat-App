@@ -63,7 +63,7 @@
                             aria-describedby="inputGroup-sizing-default" required>
                     </div>
                     <div class="btn p-1 col-12">
-                      <button type="submit" onclick="addParticipant(event)" class="btn btn-primary mx-auto"> Add
+                      <button type="submit" onclick="addUserToTheGroup(event)" class="btn btn-primary mx-auto"> Add
                             users</button><br>
                     </div><br>
 
@@ -277,6 +277,25 @@
 
         function addGroup(){
           window.location.href = '../add-group/add-group.html'
+        }
+
+        async function editGroup(){
+          try{
+            if(!selectedGroupid){
+              alert("select a group to edit")
+            }else{
+              const token  = localStorage.getItem('token');
+              const res = await axios.get(`http://localhost:3000/group/get-group-users?groupId=${selectedGroupid}`,{headers:{"auth":token}})
+                console.log("data:::",res.data.listofusers);
+            } 
+          }catch(err){
+            console.log(err)
+            displayError(err)
+          }
+        }
+        
+        function addUserToTheGroup(){
+
         }
 
         function displayError(err){
