@@ -231,20 +231,23 @@
 
         async function sendMessage(e){
           try{
-            const groupid = selectedGroupid;
-            const token = localStorage.getItem('token')
-            const decodeToken = parseJwt(token);
-            //console.log("token",decodeToken);
-            const chatdisp = document.getElementById('chatbox')
-            const textbox = document.getElementById('messageinputbox');
-            const message = textbox.value;
-            textbox.value="";
-            const messageObj={
-              message:message
+            if(!selectedGroupid){
+              alert("select a group to chat")
+            }else{
+              const groupid = selectedGroupid;
+              const token = localStorage.getItem('token')
+              const decodeToken = parseJwt(token);
+              //console.log("token",decodeToken);
+              const chatdisp = document.getElementById('chatbox')
+              const textbox = document.getElementById('messageinputbox');
+              const message = textbox.value;
+              textbox.value="";
+              const messageObj={
+                message:message
+              }
+              const res=await axios.post(`http://localhost:3000/chat/message?groupId=${groupid}`,messageObj,{headers:{"auth":token}})
+              getMessages();
             }
-            
-            const res=await axios.post(`http://localhost:3000/chat/message?groupId=${groupid}`,messageObj,{headers:{"auth":token}})
-            getMessages();
           }catch(err){
             console.log(err);
             displayError(err);
