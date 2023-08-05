@@ -25,7 +25,7 @@ exports.addGroup =async (req, res, next)=>{
         }//groupName
 
 
-        const user =0//await Groups.findAll({where:{groupName:groupName}});
+        const user = await Group.findAll({where:{groupName:groupName}});
         if(user.length>0){
             return res.status(400).json({message:'Group with this name already exists'})
         }else{
@@ -84,3 +84,133 @@ exports.getGroupUsers = async(req, res, next)=>{
     }
 }
 
+exports.addNewUser = async(req, res, next)=>{
+    try{
+        const groupId = req.query.groupId;
+        const userx=await UserAndGroup.findOne({where: {userId: req.user.id, groupId:groupId}});
+
+        if(userx.admin){   
+            console.log("userid",req.user.id);
+            const email = req.body.email.trim();
+            console.log("email:",email);
+            if(Invalidstring(email)){
+                return res.status(400).json({message:'Field can not be Empty'})
+            }
+            const userpresent = await User.findAll({where:{email:email}});
+
+            if(userpresent.length==0){
+                return res.status(404).json({message:'User not found'});
+            }
+
+            const reqgroup = await Group.findByPk(groupId);
+            const listofusers= await reqgroup.getUsers({
+                where: {email: email}
+            })
+
+            if(listofusers.length>0){
+                return res.status(400).json({message:'this person already exists in the group'})
+            }else{
+                await UserAndGroup.create({userId: userpresent[0].id, groupId: groupId}) //, admin: true
+                return res.status(200).json({message: 'Successfully added new user'})
+            }
+        }else{
+            return res.status(400).json({message:'Only admins can add new members to the group'})
+        }  
+    }catch(err){
+        console.log(err)
+        res.status(500).json({message:err})
+    }
+}
+
+exports.removeUser = async(req, res, next)=>{
+    try{
+        const groupId = req.query.groupId;
+        const userx=await UserAndGroup.findOne({where: {userId: req.user.id, groupId:groupId}});
+
+        if(userx.admin){   
+
+            const userIdtoRemove = req.body.userId;
+            console.log("userIdtoRemove:",userIdtoRemove);
+
+            const reqgroup = await Group.findByPk(groupId);
+            const userpresent= await UserAndGroup.findAll({where: {userId: userIdtoRemove, groupId:groupId}})
+            console.log("userpresent[0].id,", userpresent[0].id)
+            if(userpresent.length==0){
+                return res.status(404).json({message:'User not is in the group'});
+            }else{
+                await UserAndGroup.destroy({
+                    where: {userId:userIdtoRemove, groupId:groupId}
+                });//, admin: true
+                return res.status(200).json({message: 'User successfully removed'})
+            }
+        }else{
+            return res.status(400).json({message:'Only admins can remove members from the group'})
+        }  
+    }catch(err){
+        console.log(err)
+        res.status(500).json({message:err})
+    }
+}
+
+//addNewAdmin
+//removeAdmin
+
+exports.addNewAdmin = async(req, res, next)=>{
+    try{
+        const groupId = req.query.groupId;
+        const userx=await UserAndGroup.findOne({where: {userId: req.user.id, groupId:groupId}});
+
+        if(userx.admin){   
+            const userIdtoMakeAdmin = req.body.userId;
+            console.log("userIdtoMakeAdmin:",userIdtoMakeAdmin);
+
+            const reqgroup = await Group.findByPk(groupId);
+            const userpresent= await UserAndGroup.findAll({where: {userId: userIdtoMakeAdmin, groupId:groupId}})
+            console.log("userpresent[0].id,", userpresent[0].id)
+            if(userpresent.length==0){
+                return res.status(404).json({message:'User not is in the group'});
+            }else{
+                await UserAndGroup.update({admin: true},{where:{userId:userIdtoMakeAdmin, groupId:groupId}})
+
+                return res.status(200).json({message: 'Admin Updated'})
+            }
+        }else{
+            return res.status(400).json({message:'Only admins can remove members from the group'})
+        }  
+    }catch(err){
+        console.log(err)
+        res.status(500).json({message:err})
+    }
+}
+
+exports.removeAdmin = async(req, res, next)=>{
+    try{
+        const groupId = req.query.groupId;
+        const userx=await UserAndGroup.findOne({where: {userId: req.user.id, groupId:groupId}});
+
+        if(userx.admin){   
+            const userIdtoMakeAdmin = req.body.userId;
+
+            const reqgroup = await Group.findByPk(groupId);
+            const userpresent= await UserAndGroup.findAll({where: {userId: userIdtoMakeAdmin, groupId:groupId}})
+            console.log("is he an admin?,", userpresent[0].admin);
+            if(userpresent[0].admin== true){
+                if(userpresent.length==0){
+                    return res.status(404).json({message:'User not is in the group'});
+                }else{
+                    await UserAndGroup.update({admin: false},{where:{userId:userIdtoMakeAdmin, groupId:groupId}})
+    
+                    return res.status(200).json({message: 'Admin Updated'})
+                }
+            }else{
+                return res.status(400).json({message:'this user is not an admin'})
+            }
+            
+        }else{
+            return res.status(400).json({message:'Only admins can remove members from the group'})
+        }  
+    }catch(err){
+        console.log(err)
+        res.status(500).json({message:err})
+    }
+}

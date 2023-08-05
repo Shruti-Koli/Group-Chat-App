@@ -20,21 +20,42 @@
         <button class="btn btn-secondary mt-sm-4 mx-3 my-sm-0" style=" box-shadow: 0px 0px 20px #00000070;" onclick="closeTab()">Close</button>
       </div>
       <div class="new-user-form">
-        <form class="text-center mt-3">
+        <form onsubmit="addUserToGroup(event)" class="text-center mt-3">
           <label for="email" style="font-weight: 600;font-size: 20px;">UserID:</label>
           <input type="email" id="email" placeholder="Enter UserID" name="email">
           <button type="submit" class="btn btn-secondary">
-              Login
+              Add User
           </button>
         </form>
       </div>
       <div class="user-lists mt-3 mx-3">
-        <div class="admins" id="admin-list"></div>
+        <div class="admins" id="admin-list" style="background-color: #b4c6f8;"></div>
         <h4>Admin List:</h2>
         <hr>
-        <div class="existing-users" id="user-list"></div>
+        <table id="admin-table" class="table" >
+          <thead>
+            <tr>
+              <th style="width: 60%;">Email</th>
+              <th style="width: 25%;">RemoveAdmin</th>
+            </tr>
+          </thead>
+          <tbody id="t-admin-list">
+          </tbody>
+        </table>
+        <div class="existing-users" id="user-list" style="background-color: #b4c6f8;"></div>
         <h4>Group Members:</h2>
         <hr>
+        <table id="existing-user-table" class="table">
+          <thead>
+            <tr>
+              <th style="width: 50%;">Email</th>
+              <th style="width: 20%;">Delete</th>
+              <th style="width: 20%;">Make Admin</th>
+            </tr>
+          </thead>
+          <tbody id="t-user-list">
+          </tbody>
+        </table>
       </div>
     </div>
     <!-- bootstrap cdn -->
@@ -55,18 +76,53 @@
       window.addEventListener('DOMContentLoaded', async () => {
         try{
           //Logout code
-          const token = localStorage.getItem('token')
+          const token = localStorage.getItem('token');
+          const selectedGroupid = localStorage.getItem('selectedGroupid');
+
           if(token === null){
             logout();
           }
+          if(selectedGroupid===null){
+            window.location.href=='../home-page/home.html';
+          }
+          getData();
+          
         } catch(err){
           console.log(err);
           displayError(err);
         }
       })
 
+      async function getData(){
+        const displist1 = document.getElementById('t-admin-list');
+        displist1.innerHTML="";
+        const displist2 = document.getElementById('t-user-list');
+        displist2.innerHTML="";
+        const token = localStorage.getItem('token');
+        const selectedGroupid = localStorage.getItem('selectedGroupid');
+        const res = await axios.get(`http://localhost:3000/group/get-group-users?groupId=${selectedGroupid}`,{headers:{"auth":token}});
+        const list = res.data.listofusers;
+        list.forEach(element => {
+          if(element.userAndGroup.admin){
+            const displist = document.getElementById('t-admin-list');
+            displist.innerHTML = displist.innerHTML +`<tr id='${element.id}'>
+            <td>${element.email}</td>
+            <td><button onclick="removeAdmin('${element.id}')">Remove Admin</button></td></tr>`
+          }else{
+            const displist = document.getElementById('t-user-list');
+            displist.innerHTML = displist.innerHTML +`<tr id='${element.id}'>
+            <td>${element.email}</td>
+            <td><button onclick="makeAdmin('${element.id}')">Make Admin</button></td>
+            <td><button onclick="removeUser('${element.id}')">Remove User</button></td></tr>`
+          }
+        });
+        console.log(res.data.listofusers[0].email);
+        console.log(res.data.listofusers[0].userAndGroup.admin);
+        
+      }
       function closeTab(){
         try{
+            localStorage.removeItem('selectedGroupid');
             window.location.href='../home-page/home.html'
           }catch(err){
             console.log(err);
@@ -74,24 +130,106 @@
           }
       }
 
-      async function addGroup(e){
+      async function addUserToGroup(event){
         try{
-            e.preventDefault();
+            event.preventDefault();
+            console.log("here")
             const token = localStorage.getItem('token')
             const decodeToken = parseJwt(token);
-            //console.log("token",decodeToken);
-            const groupnamebox = document.getElementById('groupname');
-            const groupname = groupnamebox.value;
-            groupnamebox.value="";
+            const groupid = localStorage.getItem('selectedGroupid');
+            const emailbox = document.getElementById('email');
+            const newemail = emailbox.value;
+            emailbox.value="";
 
-            const groupnameObj={
-              groupName:groupname
+            const newemailObj={
+              email:newemail
             }
-            console.log(groupnameObj)
-            const res=await axios.post('http://localhost:3000/group/group',groupnameObj,{headers:{"auth":token}})
+            console.log(newemailObj)
+            const res=await axios.post(`http://localhost:3000/group/add-new-user?groupId=${groupid}`,newemailObj,{headers:{"auth":token}});
+            console.log("here2")
             console.log(res);
-            alert("Group created");
-            window.location.href = '../home-page/home.html'
+            alert("New user added");
+            getData();
+            
+          }catch(err){
+            console.log(err);
+            displayError(err);
+          }
+      }
+
+      
+      async function removeUser(uid){
+        try{
+            console.log("------")
+            console.log(uid);
+            const token = localStorage.getItem('token')
+            const decodeToken = parseJwt(token);
+            const groupid = localStorage.getItem('selectedGroupid');
+
+            const userId = uid;
+            console.log(userId);
+            const userObj={
+              userId : userId
+            };
+            console.log(userObj)
+            const res=await axios.post(`http://localhost:3000/group/remove-user?groupId=${groupid}`,userObj,{headers:{"auth":token}});
+            console.log("here2")
+            console.log(res);
+            alert("user Removed");
+            getData();
+            
+          }catch(err){
+            console.log(err);
+            displayError(err);
+          }
+      }
+
+
+      async function makeAdmin(uid){ ///make-admin' /remove-admin'
+        try{
+            console.log(uid);
+            const token = localStorage.getItem('token')
+            const decodeToken = parseJwt(token);
+            const groupid = localStorage.getItem('selectedGroupid');
+
+            const userId = uid;
+            console.log(userId);
+            const userObj={
+              userId : userId
+            };
+            console.log(userObj)
+            const res=await axios.post(`http://localhost:3000/group/make-admin?groupId=${groupid}`,userObj,{headers:{"auth":token}});
+            console.log("here2")
+            console.log(res);
+            alert("Admin Updated");
+            getData();
+            
+          }catch(err){
+            console.log(err);
+            displayError(err);
+          }
+      }
+
+      async function removeAdmin(uid){ 
+        try{
+            console.log("------")
+            console.log(uid);
+            const token = localStorage.getItem('token')
+            const decodeToken = parseJwt(token);
+            const groupid = localStorage.getItem('selectedGroupid');;
+
+            const userId = uid;
+            console.log(userId);
+            const userObj={
+              userId : userId
+            };
+            console.log(userObj)
+            const res=await axios.post(`http://localhost:3000/group/remove-admin?groupId=${groupid}`,userObj,{headers:{"auth":token}});
+            console.log("here2")
+            console.log(res);
+            alert("Admin Removed");
+            getData();
+            
           }catch(err){
             console.log(err);
             displayError(err);

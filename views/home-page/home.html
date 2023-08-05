@@ -50,33 +50,9 @@
             </div>        
           </div>
         </div>
-        <div class="col" id="editcolumn" hidden="hidden">
-          <div class="card">
-            <div class="card-header text-center">Add Users </div>
-              <div class="p-2 input-group mb-3">
-                <span class="input-group-text">User's Name :</span>
-                  <input type="text" id="usersname" class="form-control" aria-label="Sizing example input"
-                        aria-describedby="inputGroup-sizing-default" required>
-                    <div class="input-group mb-3">
-                      <span class="input-group-text">User Email :</span>
-                      <input type="email" id="usersemail" class="form-control" aria-label="Sizing example input"
-                            aria-describedby="inputGroup-sizing-default" required>
-                    </div>
-                    <div class="btn p-1 col-12">
-                      <button type="submit" onclick="addUserToTheGroup(event)" class="btn btn-primary mx-auto"> Add
-                            users</button><br>
-                    </div><br>
+        <!-- <div class="col" id="editcolumn" hidden="hidden">
 
-                    <p class="text-center fst-italic  mx-auto" id="useraddingresult"></p>
-                </div>
-                <div class="card-footer text-center">
-                  Manage Users<br>
-                  <p id="manageusersmessagediv"></p>
-                </div>
-                <div class="card-body text-center" id="userslist">
-              </div>
-            </div>
-        </div>
+        </div> -->
       </div>
     </div>
     <!-- bootstrap cdn -->
@@ -284,9 +260,8 @@
             if(!selectedGroupid){
               alert("select a group to edit")
             }else{
-              const token  = localStorage.getItem('token');
-              const res = await axios.get(`http://localhost:3000/group/get-group-users?groupId=${selectedGroupid}`,{headers:{"auth":token}})
-                console.log("data:::",res.data.listofusers);
+              localStorage.setItem('selectedGroupid',selectedGroupid);
+              window.location.href='../edit-group/edit-group.html'
             } 
           }catch(err){
             console.log(err)
