@@ -62,6 +62,30 @@ exports.getGroups = async(req, res, next)=>{
     }
 }
 
+exports.isAdmin = async(req, res, next)=>{
+    try{
+        const groupId = req.query.groupId;
+        const usera = await User.findByPk(req.user.id);
+        const usersDetails= await usera.getGroups({
+                where:{id: groupId }
+            })
+        console.log("usersDetails",usersDetails[0].userAndGroup.admin)
+        if(usersDetails[0].userAndGroup.admin){
+            return res.status(200).json({
+                message: "is admin"
+             })
+        }else{
+            return res.status(400).json({
+                message: "Only Admins can edit the group"
+             })
+        }
+        
+    }catch(err){
+        console.log(err)
+        res.status(500).json({message:err})
+    }
+}
+
 exports.getGroupUsers = async(req, res, next)=>{
     try{
         const groupId = req.query.groupId;
@@ -73,7 +97,7 @@ exports.getGroupUsers = async(req, res, next)=>{
                 attributes:['id','name','email']
             })
 
-            console.log("userList:::",listofusers)
+            // console.log("userList:::",listofusers)
             return res.status(200).json({listofusers: listofusers})
         }else{
             return res.status(400).json({message:'Only admins can edit the group'})

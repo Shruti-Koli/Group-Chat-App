@@ -260,7 +260,12 @@
             if(!selectedGroupid){
               alert("select a group to edit")
             }else{
+              const token = localStorage.getItem('token')
+              const decodeToken = parseJwt(token);
+              console.log(" decoded token",decodeToken);
               localStorage.setItem('selectedGroupid',selectedGroupid);
+              const isAdmin = await axios.get(`http://localhost:3000/group/isadmin?groupId=${selectedGroupid}`,{headers:{"auth":token}});
+              //console.log("isAdmin",isAdmin)
               window.location.href='../edit-group/edit-group.html'
             } 
           }catch(err){
@@ -269,9 +274,6 @@
           }
         }
         
-        function addUserToTheGroup(){
-
-        }
 
         function displayError(err){
           const content = document.getElementById('content')
