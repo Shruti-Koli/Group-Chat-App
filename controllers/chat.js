@@ -15,7 +15,7 @@ exports.getChats = async(req, res, next)=>{
     try{
         const previousId = req.query.previousId;
         const groupId = req.query.groupId;
-        console.log('previousId======',previousId);
+        //console.log('previousId======',previousId);
         const data = await Chat.findAll({
             attributes: ['id','message','groupId'],
             where:{
@@ -42,11 +42,11 @@ exports.getChats = async(req, res, next)=>{
 
 exports.addChat =async (req, res, next)=>{
     try{
-        console.log("req.body.message",req.body.message);
-        console.log("user id",req.user.id);
+        //console.log("req.body.message",req.body.message);
+        //console.log("user id",req.user.id);
         const message = req.body.message.trim();
         const groupId = req.query.groupId;
-        console.log("groupId",groupId);
+        //console.log("groupId",groupId);
         if(Invalidstring(message)){
             return res.status(400).json({message:'Type some message to send'})
         }

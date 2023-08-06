@@ -17,9 +17,9 @@ function Invalidstring(str){
 exports.addGroup =async (req, res, next)=>{
     const t = await sequelize.transaction()
     try{
-        console.log("userid",req.user.id);
+        //console.log("userid",req.user.id);
         const groupName = req.body.groupName.trim();
-        console.log("groupname:",groupName);
+        //console.log("groupname:",groupName);
         if(Invalidstring(groupName)){
             return res.status(400).json({message:'Group Name can not be Empty'})
         }//groupName
@@ -31,7 +31,7 @@ exports.addGroup =async (req, res, next)=>{
         }else{
             const data = await Group.create({groupName: groupName},{ transaction:t})
     
-            console.log("created group id:",data.id)
+            //console.log("created group id:",data.id)
         
             await UserAndGroup.create({userId: req.user.id, groupId: data.id, admin: true}, { transaction: t }) 
 
@@ -69,7 +69,7 @@ exports.isAdmin = async(req, res, next)=>{
         const usersDetails= await usera.getGroups({
                 where:{id: groupId }
             })
-        console.log("usersDetails",usersDetails[0].userAndGroup.admin)
+        //console.log("usersDetails",usersDetails[0].userAndGroup.admin)
         if(usersDetails[0].userAndGroup.admin){
             return res.status(200).json({
                 message: "is admin"
@@ -114,9 +114,9 @@ exports.addNewUser = async(req, res, next)=>{
         const userx=await UserAndGroup.findOne({where: {userId: req.user.id, groupId:groupId}});
 
         if(userx.admin){   
-            console.log("userid",req.user.id);
+            //console.log("userid",req.user.id);
             const email = req.body.email.trim();
-            console.log("email:",email);
+            //console.log("email:",email);
             if(Invalidstring(email)){
                 return res.status(400).json({message:'Field can not be Empty'})
             }
@@ -154,11 +154,11 @@ exports.removeUser = async(req, res, next)=>{
         if(userx.admin){   
 
             const userIdtoRemove = req.body.userId;
-            console.log("userIdtoRemove:",userIdtoRemove);
+            //console.log("userIdtoRemove:",userIdtoRemove);
 
             const reqgroup = await Group.findByPk(groupId);
             const userpresent= await UserAndGroup.findAll({where: {userId: userIdtoRemove, groupId:groupId}})
-            console.log("userpresent[0].id,", userpresent[0].id)
+            //console.log("userpresent[0].id,", userpresent[0].id)
             if(userpresent.length==0){
                 return res.status(404).json({message:'User not is in the group'});
             }else{
@@ -186,11 +186,11 @@ exports.addNewAdmin = async(req, res, next)=>{
 
         if(userx.admin){   
             const userIdtoMakeAdmin = req.body.userId;
-            console.log("userIdtoMakeAdmin:",userIdtoMakeAdmin);
+            //console.log("userIdtoMakeAdmin:",userIdtoMakeAdmin);
 
             const reqgroup = await Group.findByPk(groupId);
             const userpresent= await UserAndGroup.findAll({where: {userId: userIdtoMakeAdmin, groupId:groupId}})
-            console.log("userpresent[0].id,", userpresent[0].id)
+            //console.log("userpresent[0].id,", userpresent[0].id)
             if(userpresent.length==0){
                 return res.status(404).json({message:'User not is in the group'});
             }else{
@@ -217,7 +217,7 @@ exports.removeAdmin = async(req, res, next)=>{
 
             const reqgroup = await Group.findByPk(groupId);
             const userpresent= await UserAndGroup.findAll({where: {userId: userIdtoMakeAdmin, groupId:groupId}})
-            console.log("is he an admin?,", userpresent[0].admin);
+            //console.log("is he an admin?,", userpresent[0].admin);
             if(userpresent[0].admin== true){
                 if(userpresent.length==0){
                     return res.status(404).json({message:'User not is in the group'});

@@ -12,7 +12,7 @@ const signup = async (req,res,next)=>{
         const name = req.body.name.trim();
         const email= req.body.email.trim();
         const pass = req.body.pass;
-        console.log(`sign up with:${name} ${email} ${pass}`)
+        //console.log(`sign up with:${name} ${email} ${pass}`)
         if(Invalidstring(name) || Invalidstring(email) || Invalidstring(pass)){
             return res.status(400).json({err:'All the fields are mandatory'})
         }
@@ -38,7 +38,7 @@ const login = async(req,res,next)=>{
     try{
         const email= req.body.email.trim();
         const pass = req.body.pass;
-        console.log(`with: ${email} ${pass}`)
+        //console.log(`with: ${email} ${pass}`)
         if(Invalidstring(email) || Invalidstring(pass)){
             return res.status(400).json({success:false,message:'All the fields are mandatory'})
         }
